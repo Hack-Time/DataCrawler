@@ -31,29 +31,31 @@ class Crawler:
         students = response.json()
 
         for student in students:
-            id = student["id"]
-            self.studentIDs.append(id)
+            stu = Student()
+            stu.id = student["id"]
+            stu.gender = student["gender"]
+            stu.graduateYear = student["graduates_in"]
+            self.students.append(stu)
+            # id = student["id"]
+            # self.studentIDs.append(id)
 
 
     def fetchStudentsInfo(self,
                           url="http://open.test.seiue.com/api/v1/students/:id/transcripts"):
-        for id in self.studentIDs:
-            student = Student()
+        for i in range(0, len(self.students)):
             subjects = []
-
-            student.id = id
-            response = requests.get(url.replace(":id", str(id)), headers = self.headers)
+            response = requests.get(url.replace(":id", str(self.students[i].id)), headers=self.headers)
             studentInfo = response.json()
 
             for gradeInfo in studentInfo["grade_list"]:
                 for subjectInfo in gradeInfo["grade_list"]:
-                    subject = Subject(subjectInfo["source_id"], subjectInfo["name"], subjectInfo["evaluation"]["100"], subjectInfo["evaluation"]["abc"], subjectInfo["evaluation"]["gpa"], subjectInfo["evaluation"]["rank"])
+                    # print(subjectInfo)
+                    subject = Subject(subjectInfo["source_id"], subjectInfo["name"], subjectInfo["evaluation"]["100"],
+                                      subjectInfo["evaluation"]["abc"], subjectInfo["evaluation"]["gpa"],
+                                      subjectInfo["evaluation"]["rank"])
                     subjects.append(subject)
-
-            student.subjects = subjects
-            print(student.id)
-            print(student.subjects[0].name + "---" + str(student.subjects[0].grade))
-            self.students.append(student)
+            self.students[i].subjects = subjects
+            print(str(self.students[i].graduateYear) + "---" + str(self.students[i].subjects[0].grade))
 
 crawler = Crawler()
 
@@ -61,4 +63,4 @@ crawler.fetchToken()
 crawler.fetchAllStudents()
 crawler.fetchStudentsInfo()
 
-print(crawler.students)
+# crawler.students.to_csv("data/students.csv")

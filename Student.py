@@ -2,6 +2,8 @@
 
 class Student:
     id = 0
+    gender = ""
+    graduateYear = 0
     subjects = []
 
     # def __init__(self, id, subjects):
