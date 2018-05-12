@@ -1,7 +1,10 @@
 # -*- coding: UTF-8 -*-
-import requests, json
+import requests
+import codecs
+import pandas as pd
 from Student import Student
 from Subject import Subject
+import csv
 
 class Crawler:
     clientID = "368912"
@@ -26,7 +29,7 @@ class Crawler:
         }
 
     def fetchAllStudents(self,
-                         url="http://open.test.seiue.com/api/v1/reflections?role=1&$per-page=1000&$page=1"):
+                         url="http://open.test.seiue.com/api/v1/reflections?role=1&$per-page=100000&$page=1"):
         response = requests.get(url, headers=self.headers)
         students = response.json()
 
@@ -42,7 +45,7 @@ class Crawler:
 
     def fetchStudentsInfo(self,
                           url="http://open.test.seiue.com/api/v1/students/:id/transcripts"):
-        for i in range(0, len(self.students)):
+        for i in range(len(self.students)):
             subjects = []
             response = requests.get(url.replace(":id", str(self.students[i].id)), headers=self.headers)
             studentInfo = response.json()
@@ -55,7 +58,7 @@ class Crawler:
                                       subjectInfo["evaluation"]["rank"])
                     subjects.append(subject)
             self.students[i].subjects = subjects
-            print(str(self.students[i].graduateYear) + "---" + str(self.students[i].subjects[0].grade))
+            # print(str(self.students[i].graduateYear) + "---" + str(self.students[i].subjects[0].grade))
 
 crawler = Crawler()
 
@@ -63,4 +66,19 @@ crawler.fetchToken()
 crawler.fetchAllStudents()
 crawler.fetchStudentsInfo()
 
-# crawler.students.to_csv("data/students.csv")
+columnName = ["id"]
+
+print(crawler.students)
+
+# data = pd.DataFrame(columns=columnName, data={crawler.students.id})
+#
+# data.to_csv("./data/students.csv")
+
+# csvFile2 = open("./data/students.csv", "w")
+
+csvFile2 = codecs.open("./data/students.csv", "w", "utf_8_sig")
+writer = csv.writer(csvFile2)
+m = len(crawler.students)
+for i in range(m):
+    writer.writerow([crawler.students[i].id, crawler.students[i].gender, crawler.students[i].graduateYear, crawler.students[i].subjects[0].name, crawler.students[i].subjects[0].grade])
+csvFile2.close()
